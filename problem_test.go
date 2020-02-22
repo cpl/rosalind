@@ -2,6 +2,7 @@ package rosalind
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -125,4 +126,23 @@ ATGGCACT
 
 	matrix := DNAtoProfileMatrix(fasta.DNAs()...)
 	assert.Equal(t, "ATGCAACT", matrix.ConsensusString())
+}
+
+func TestProblemMPRT(t *testing.T) {
+	t.Parallel()
+
+	ids := map[string][]int{
+		"A2Z669":            {},
+		"B5ZC00":            {85, 118, 142, 306, 395},
+		"P07204_TRBM_HUMAN": {47, 115, 116, 382, 409},
+		"P20840_SAG1_YEAST": {79, 109, 135, 248, 306, 348, 364, 402, 485, 501, 614},
+	}
+
+	for id, expected := range ids {
+		protein, err := GetUniProt(id)
+		assert.NoError(t, err, id)
+		fmt.Println(id)
+		loc := Motif2(protein, "N{P}[ST]{P}")
+		assert.Equal(t, expected, loc, id)
+	}
 }
