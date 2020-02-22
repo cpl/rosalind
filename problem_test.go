@@ -80,3 +80,10 @@ func TestProblemPROT(t *testing.T) {
 	rna := "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA"
 	assert.Equal(t, "MAMAPRTEINSTRING", RNAtoProtein(rna))
 }
+
+func TestProblemSUBS(t *testing.T) {
+	t.Parallel()
+
+	dna := "GATATATGCATATACTT"
+	assert.Equal(t, []int{2, 4, 10}, Motif(dna, "ATAT"))
+}
