@@ -69,3 +69,8 @@ TGGGAACCTGCGGGCAGTAGGTGGAAT
 	assert.Equal(t, "Rosalind_0808", maxkey)
 	assert.Equal(t, 60.91954022988506, maxGC)
 }
+
+func TestProblemHAMM(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, 7, HammingDistance("GAGCCTACTAACGGGAT", "CATCGTAATGACGGCCT"))
+}
