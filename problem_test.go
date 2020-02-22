@@ -35,3 +35,9 @@ func TestProblemREVC(t *testing.T) {
 
 	assert.Equal(t, "ACCGGGTTTT", revc)
 }
+
+func TestProblemFIB(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, 19, Rabbits(5, 3))
+}
