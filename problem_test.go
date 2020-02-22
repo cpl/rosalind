@@ -26,3 +26,12 @@ func TestProblemRNA(t *testing.T) {
 
 	assert.Equal(t, "GAUGGAACUUGACUACGUAAAUU", rna)
 }
+
+func TestProblemREVC(t *testing.T) {
+	t.Parallel()
+
+	dna := "AAAACCCGGT"
+	revc := ReverseComplement(dna)
+
+	assert.Equal(t, "ACCGGGTTTT", revc)
+}
