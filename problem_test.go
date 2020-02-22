@@ -74,3 +74,9 @@ func TestProblemHAMM(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, 7, HammingDistance("GAGCCTACTAACGGGAT", "CATCGTAATGACGGCCT"))
 }
+
+func TestProblemPROT(t *testing.T) {
+	t.Parallel()
+	rna := "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA"
+	assert.Equal(t, "MAMAPRTEINSTRING", RNAtoProtein(rna))
+}
