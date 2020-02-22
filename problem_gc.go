@@ -20,6 +20,17 @@ func GCContent(dna string) float64 {
 
 type FASTA map[string]string
 
+func (fasta FASTA) DNAs() []string {
+	dnas := make([]string, len(fasta))
+
+	index := 0
+	for _, dna := range fasta {
+		dnas[index] = dna
+		index++
+	}
+	return dnas
+}
+
 func (fasta FASTA) MaxGCContent() (string, float64) {
 	maxkey := ""
 	maxGC := 0.0

@@ -99,3 +99,30 @@ func TestProblemPRTM(t *testing.T) {
 
 	assert.Equal(t, 821.3919199999999, ProteinMass("SKADYEK"))
 }
+
+func TestProblemCONS(t *testing.T) {
+	t.Parallel()
+
+	fastaData := `
+>Rosalind_1
+ATCCAGCT
+>Rosalind_2
+GGGCAACT
+>Rosalind_3
+ATGGATCT
+>Rosalind_4
+AAGCAACC
+>Rosalind_5
+TTGGAACT
+>Rosalind_6
+ATGCCATT
+>Rosalind_7
+ATGGCACT
+`
+
+	buffer := bytes.NewBufferString(fastaData)
+	fasta := LoadFASTA(buffer)
+
+	matrix := DNAtoProfileMatrix(fasta.DNAs()...)
+	assert.Equal(t, "ATGCAACT", matrix.ConsensusString())
+}
