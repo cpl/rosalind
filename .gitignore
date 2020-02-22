@@ -16,3 +16,4 @@
 
 cmd/
 .idea/
+**/*.fasta

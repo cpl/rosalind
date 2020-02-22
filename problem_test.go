@@ -1,6 +1,7 @@
 package rosalind
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,4 +41,31 @@ func TestProblemFIB(t *testing.T) {
 	t.Parallel()
 
 	assert.Equal(t, 19, Rabbits(5, 3))
+}
+
+func TestProblemGC(t *testing.T) {
+	t.Parallel()
+
+	gcPercent := GCContent("AGCTATAG")
+	assert.Equal(t, 37.5, gcPercent)
+
+	fastaData := `
+>Rosalind_6404
+CCTGCGGAAGATCGGCACTAGAATAGCCAGAACCGTTTCTCTGAGGCTTCCGGCCTTCCC
+TCCCACTAATAATTCTGAGG
+>Rosalind_5959
+CCATCGGTAGCGCATCCTTAGTCCAATTAAGTCCCTATCCAGGCGCTCCGCCGAAGGTCT
+ATATCCATTTGTCAGCAGACACGC
+>Rosalind_0808
+CCACCCTCGTGGTATGGCTAGGCATTCAGGAACCGGAGAACGCTTCAGACCAGCCCGGAC
+TGGGAACCTGCGGGCAGTAGGTGGAAT
+`
+
+	buffer := bytes.NewBufferString(fastaData)
+	fasta := LoadFASTA(buffer)
+
+	maxkey, maxGC := fasta.MaxGCContent()
+
+	assert.Equal(t, "Rosalind_0808", maxkey)
+	assert.Equal(t, 60.91954022988506, maxGC)
 }
