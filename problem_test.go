@@ -93,3 +93,9 @@ func TestProblemMRNA(t *testing.T) {
 
 	assert.Equal(t, 12, ProteinToRNACount("MA\x00"))
 }
+
+func TestProblemPRTM(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, 821.3919199999999, ProteinMass("SKADYEK"))
+}
