@@ -146,3 +146,29 @@ func TestProblemMPRT(t *testing.T) {
 		assert.Equal(t, expected, loc, id)
 	}
 }
+
+func TestProblemGRPH(t *testing.T) {
+	t.Parallel()
+
+	fastaData := `
+>Rosalind_0498
+AAATAAA
+>Rosalind_2391
+AAATTTT
+>Rosalind_2323
+TTTTCCC
+>Rosalind_0442
+AAATCCC
+>Rosalind_5013
+GGGTGGG
+`
+
+	buffer := bytes.NewBufferString(fastaData)
+	fasta := LoadFASTA(buffer)
+
+	assert.Equal(t, [][]string{
+		{"Rosalind_0498", "Rosalind_2391"},
+		{"Rosalind_0498", "Rosalind_0442"},
+		{"Rosalind_2391", "Rosalind_2323"},
+	}, fasta.Graph(3))
+}
