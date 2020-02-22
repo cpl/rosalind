@@ -87,3 +87,9 @@ func TestProblemSUBS(t *testing.T) {
 	dna := "GATATATGCATATACTT"
 	assert.Equal(t, []int{2, 4, 10}, Motif(dna, "ATAT"))
 }
+
+func TestProblemMRNA(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, 12, ProteinToRNACount("MA\x00"))
+}
