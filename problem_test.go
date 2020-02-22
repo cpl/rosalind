@@ -17,3 +17,12 @@ func TestProblemDNA(t *testing.T) {
 	assert.Equal(t, 17, count['G'])
 	assert.Equal(t, 21, count['T'])
 }
+
+func TestProblemRNA(t *testing.T) {
+	t.Parallel()
+
+	dna := "GATGGAACTTGACTACGTAAATT"
+	rna := DNAtoRNA(dna)
+
+	assert.Equal(t, "GAUGGAACUUGACUACGUAAAUU", rna)
+}
