@@ -172,3 +172,22 @@ GGGTGGG
 		{"Rosalind_2391", "Rosalind_2323"},
 	}, fasta.Graph(3))
 }
+
+func TestProblemORF(t *testing.T) {
+	t.Parallel()
+
+	dna := "AGCCATGTAGCTAACTCAGGTTACATGGGGATGACCCCGCGACTTGGATTAGAGTCTCTTTTGGAATAAGCCTGAATGATCCGAGTAGCATCTCAG"
+	frames := ORF(dna)
+	framesDistinct := make(map[string]int)
+
+	for _, frame := range frames {
+		framesDistinct[RNAtoProtein(frame)] = 0
+	}
+
+	assert.Equal(t, map[string]int{
+		"MLLGSFRLIPKETLIQVAGSSPCNLS": 0,
+		"M":                          0,
+		"MGMTPRLGLESLLE":             0,
+		"MTPRLGLESLLE":               0,
+	}, framesDistinct)
+}
