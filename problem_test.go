@@ -191,3 +191,18 @@ func TestProblemORF(t *testing.T) {
 		"MTPRLGLESLLE":               0,
 	}, framesDistinct)
 }
+
+func TestProblemPERM(t *testing.T) {
+	t.Parallel()
+
+	perms := Permutations(3)
+	assert.Len(t, perms, 6)
+	assert.Equal(t, [][]int{
+		{1, 2, 3},
+		{2, 1, 3},
+		{3, 2, 1},
+		{2, 3, 1},
+		{3, 1, 2},
+		{1, 3, 2},
+	}, perms)
+}
