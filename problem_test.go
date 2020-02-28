@@ -206,3 +206,24 @@ func TestProblemPERM(t *testing.T) {
 		{1, 3, 2},
 	}, perms)
 }
+
+func TestProblemSPLC(t *testing.T) {
+	t.Parallel()
+
+	fastaData := `
+>Rosalind_10
+ATGGTCTACATAGCTGACAAACAGCACGTAGCAATCGGTCGAATCTCGAGAGGCATATGGTCACATGATCGGTCGAGCGTGTTTCAAAGTTTGCGCCTAG
+>Rosalind_12
+ATCGGTCGAA
+>Rosalind_15
+ATCGGTCGAGCGTGT
+`
+
+	buffer := bytes.NewBufferString(fastaData)
+	fasta := LoadFASTA(buffer)
+
+	dnas := fasta.DNAs()
+	dna := Splice(dnas[0], dnas[1:]...)
+
+	assert.Equal(t, "MVYIADKQHVASREAYGHMFKVCA", DNAtoProtein(dna))
+}
