@@ -5,18 +5,25 @@ import (
 	"io"
 )
 
+type FASTASequence struct {
+	Label string
+	Data  []byte
+}
+
 type FASTA struct {
-	Labels []string
-	Data   [][]byte
+	lookup    map[string]int
+	Sequences []FASTASequence
 }
 
 func ParseFASTA(r io.Reader) *FASTA {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanLines)
 
-	labels := make([]string, 0)
-	data := make([][]byte, 0)
-	buffer := make([]byte, 0, 1<<10)
+	fasta := &FASTA{
+		Sequences: make([]FASTASequence, 0, 16),
+	}
+
+	var sequence FASTASequence
 
 	for scanner.Scan() {
 		line := scanner.Bytes()
@@ -24,44 +31,63 @@ func ParseFASTA(r io.Reader) *FASTA {
 			continue
 		}
 
-		if line[0] == '>' {
-			labels = append(labels, string(line[1:]))
-			if len(labels) > 1 {
-				data = append(data, buffer)
-				buffer = make([]byte, 0, 1<<10)
-			}
-
+		if line[0] != '>' {
+			sequence.Data = append(sequence.Data, line...)
 			continue
 		}
 
-		buffer = append(buffer, line...)
+		if sequence.Label != "" {
+			fasta.Sequences = append(fasta.Sequences, sequence)
+		}
+
+		sequence.Label = string(line[1:])
+		sequence.Data = make([]byte, 0, 1024)
 	}
 
-	data = append(data, buffer)
-
-	return &FASTA{
-		Labels: labels,
-		Data:   data,
+	if sequence.Label != "" {
+		fasta.Sequences = append(fasta.Sequences, sequence)
 	}
-}
 
-func (fasta *FASTA) GetData(label string) []byte {
-	for idx, l := range fasta.Labels {
-		if l == label {
-			return fasta.Data[idx]
+	if len(fasta.Sequences) > 16 {
+		fasta.lookup = make(map[string]int, len(fasta.Sequences))
+		for idx, seq := range fasta.Sequences {
+			fasta.lookup[seq.Label] = idx
 		}
 	}
 
-	return nil
+	return fasta
+}
+
+func (fasta *FASTA) IndexLabel(label string) int {
+	if fasta.lookup != nil {
+		return fasta.lookup[label]
+	}
+
+	for idx := range fasta.Sequences {
+		if fasta.Sequences[idx].Label == label {
+			return idx
+		}
+	}
+
+	return -1
+}
+
+func (fasta *FASTA) GetData(label string) []byte {
+	idx := fasta.IndexLabel(label)
+	if idx == -1 {
+		return nil
+	}
+
+	return fasta.Sequences[idx].Data
 }
 
 func (fasta *FASTA) WriteTo(w io.Writer) (n int64, err error) {
 	var wN int
 
-	for idx, label := range fasta.Labels {
-		data := fasta.Data[idx]
+	for idx := range fasta.Sequences {
+		data := fasta.Sequences[idx].Data
 
-		wN, err = fasta.WriteToLabel(w, label, data, 60)
+		wN, err = fasta.WriteToLabel(w, fasta.Sequences[idx].Label, data, 60)
 		if err != nil {
 			return n + int64(wN), err
 		}
@@ -72,14 +98,22 @@ func (fasta *FASTA) WriteTo(w io.Writer) (n int64, err error) {
 	return n, nil
 }
 
+var (
+	fastaLabelIdentifier = []byte{'>'}
+	fastaNewLine         = []byte{'\n'}
+)
+
 func (fasta *FASTA) WriteToLabel(w io.Writer, label string, data []byte, lineLen int) (n int, err error) {
 	var wN int
 
-	wN, err = w.Write([]byte(">" + label + "\n"))
+	_, _ = w.Write(fastaLabelIdentifier)
+	wN, err = w.Write([]byte(label))
 	if err != nil {
 		return n + wN, err
 	}
-	n += wN
+	_, _ = w.Write(fastaNewLine)
+
+	n += wN + 2
 
 	for len(data) > 0 {
 		to := lineLen
@@ -96,7 +130,7 @@ func (fasta *FASTA) WriteToLabel(w io.Writer, label string, data []byte, lineLen
 		data = data[to:]
 
 		if len(data) > 0 {
-			wN, err = w.Write([]byte("\n"))
+			wN, err = w.Write(fastaNewLine)
 			if err != nil {
 				return n + wN, err
 			}
@@ -104,7 +138,7 @@ func (fasta *FASTA) WriteToLabel(w io.Writer, label string, data []byte, lineLen
 		}
 	}
 
-	wN, err = w.Write([]byte("\n"))
+	wN, err = w.Write(fastaNewLine)
 	if err != nil {
 		return n + wN, err
 	}
@@ -113,11 +147,11 @@ func (fasta *FASTA) WriteToLabel(w io.Writer, label string, data []byte, lineLen
 }
 
 func (fasta *FASTA) Graph(prefixLen int) map[string][]string {
-	m := make(map[string][]string)
+	m := make(map[string][]string, len(fasta.Sequences))
 
-	for idx, data := range fasta.Data {
-		prefix := string(data[:prefixLen])
-		m[prefix] = append(m[prefix], fasta.Labels[idx])
+	for idx := range fasta.Sequences {
+		prefix := string(fasta.Sequences[idx].Data[:prefixLen])
+		m[prefix] = append(m[prefix], fasta.Sequences[idx].Label)
 	}
 
 	return m

@@ -403,13 +403,13 @@ ACGATAATGTATTGAAAGGTCTGCAGTCGGTACCTTTGA
 	maxGC := -1.0
 	maxLabel := ""
 
-	for idx, label := range fasta.Labels {
-		dna, _ := NewDNA(fasta.Data[idx])
+	for _, seq := range fasta.Sequences {
+		dna, _ := NewDNA(seq.Data)
 		gc := dna.GCContentPercent()
 
 		if gc > maxGC {
 			maxGC = gc
-			maxLabel = label
+			maxLabel = seq.Label
 		}
 	}
 

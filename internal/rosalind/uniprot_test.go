@@ -1,6 +1,8 @@
 package rosalind
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestUniprotDownloadSequence(t *testing.T) {
 	t.Parallel()
@@ -10,6 +12,5 @@ func TestUniprotDownloadSequence(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(fasta.Labels)
-	t.Log(fasta.Data)
+	t.Log(fasta.Sequences)
 }
