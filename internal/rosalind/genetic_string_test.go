@@ -34,9 +34,9 @@ func Test_Motif(t *testing.T) {
 func Test_HammingDistance(t *testing.T) {
 	t.Parallel()
 
-	tests := map[string]int{
-		"GAGCCTACTAACGGGAT/CATCGTAATGACGGCCT": 7,
-		"CATCGTAATGACGGCCT/CATCGTAATGACGGCCT": 0,
+	tests := map[string]struct{ num int }{
+		"GAGCCTACTAACGGGAT/CATCGTAATGACGGCCT": {num: 7},
+		"CATCGTAATGACGGCCT/CATCGTAATGACGGCCT": {num: 0},
 	}
 
 	for test, want := range tests {
@@ -50,8 +50,8 @@ func Test_HammingDistance(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if distance != want {
-				t.Errorf("expected %d, got %d", want, distance)
+			if distance != want.num {
+				t.Errorf("expected %d, got %d", want.num, distance)
 			}
 		})
 	}

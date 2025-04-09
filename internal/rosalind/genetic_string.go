@@ -10,7 +10,7 @@ func Motif(data, motif []byte) []int {
 		return []int{}
 	}
 
-	idxList := make([]int, 0)
+	idxList := make([]int, 0, bytes.Count(data, motif))
 	offset := 1
 
 	for {
