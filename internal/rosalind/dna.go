@@ -4,7 +4,25 @@ import (
 	"bytes"
 	"fmt"
 	"sync"
+
+	"github.com/cpl/rosalind/internal/unsafe"
 )
+
+var (
+	bytesDNAA = []byte{'A'}
+	bytesDNAC = []byte{'C'}
+	bytesDNAG = []byte{'G'}
+	bytesDNAT = []byte{'T'}
+
+	bytesRNAU = []byte{'U'}
+)
+
+var dnaComplement = [0x100]byte{
+	'A': 'T',
+	'C': 'G',
+	'G': 'C',
+	'T': 'A',
+}
 
 type DNA struct {
 	data    []byte
@@ -23,10 +41,7 @@ func NewDNA(b []byte) (*DNA, error) {
 			b[idx] = char
 		}
 
-		switch char {
-		case 'A', 'C', 'G', 'T':
-		default:
-			//panic("invalid DNA character")
+		if dnaComplement[char] == 0 {
 			return nil, fmt.Errorf("%w: invalid DNA character '%c'", ErrInvalidGeneticString, char)
 		}
 	}
@@ -43,10 +58,10 @@ func (dna *DNA) Count() (a, c, g, t int) {
 		return dna.a, dna.c, dna.g, dna.t
 	}
 
-	dna.a = bytes.Count(dna.data, []byte("A"))
-	dna.c = bytes.Count(dna.data, []byte("C"))
-	dna.g = bytes.Count(dna.data, []byte("G"))
-	dna.t = bytes.Count(dna.data, []byte("T"))
+	dna.a = bytes.Count(dna.data, bytesDNAA)
+	dna.c = bytes.Count(dna.data, bytesDNAC)
+	dna.g = bytes.Count(dna.data, bytesDNAG)
+	dna.t = bytes.Count(dna.data, bytesDNAT)
 	dna.counted = true
 
 	return dna.a, dna.c, dna.g, dna.t
@@ -61,22 +76,22 @@ func (dna *DNA) CountThreaded() (a, c, g, t int) {
 	wg.Add(4)
 
 	go func() {
-		dna.a = bytes.Count(dna.data, []byte("A"))
+		dna.a = bytes.Count(dna.data, bytesDNAA)
 		wg.Done()
 	}()
 
 	go func() {
-		dna.c = bytes.Count(dna.data, []byte("C"))
+		dna.c = bytes.Count(dna.data, bytesDNAC)
 		wg.Done()
 	}()
 
 	go func() {
-		dna.g = bytes.Count(dna.data, []byte("G"))
+		dna.g = bytes.Count(dna.data, bytesDNAG)
 		wg.Done()
 	}()
 
 	go func() {
-		dna.t = bytes.Count(dna.data, []byte("T"))
+		dna.t = bytes.Count(dna.data, bytesDNAT)
 		wg.Done()
 	}()
 
@@ -87,7 +102,7 @@ func (dna *DNA) CountThreaded() (a, c, g, t int) {
 }
 
 func (dna *DNA) String() string {
-	return string(dna.data)
+	return unsafe.BytesToString(dna.data)
 }
 
 func (dna *DNA) StringReverse() string {
@@ -103,7 +118,7 @@ func (dna *DNA) StringReverse() string {
 
 func (dna *DNA) ToRNA() *RNA {
 	return &RNA{
-		data:    bytes.ReplaceAll(dna.data, []byte("T"), []byte("U")),
+		data:    bytes.ReplaceAll(dna.data, bytesDNAT, bytesRNAU),
 		counted: dna.counted,
 		a:       dna.a,
 		c:       dna.c,
@@ -115,16 +130,7 @@ func (dna *DNA) ToRNA() *RNA {
 func (dna *DNA) Complement() *DNA {
 	data := make([]byte, len(dna.data))
 	for idx, char := range dna.data {
-		switch char {
-		case 'A':
-			data[idx] = 'T'
-		case 'C':
-			data[idx] = 'G'
-		case 'G':
-			data[idx] = 'C'
-		case 'T':
-			data[idx] = 'A'
-		}
+		data[idx] = dnaComplement[char]
 	}
 
 	return &DNA{
