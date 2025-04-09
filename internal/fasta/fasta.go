@@ -2,12 +2,17 @@ package fasta
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 )
 
 type Sequence struct {
 	Label string
 	Data  []byte
+}
+
+func (seq *Sequence) String() string {
+	return fmt.Sprintf("%s[%d]", seq.Label, len(seq.Data))
 }
 
 type FASTA struct {
