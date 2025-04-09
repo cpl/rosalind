@@ -1,10 +1,12 @@
-package rosalind
+package fasta_test
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/cpl/rosalind/internal/fasta"
 )
 
 func Test_ParseFASTA(t *testing.T) {
@@ -21,25 +23,25 @@ MGQFYVMDDKKTVEQVIAEKEKEFGGKIKIVEFICFEVGEGLEKKTEDFAAEVAAQL
 SATVSEINSETDFVAKNDQFIALTKDTTAHIQSNSLQSVEELHSSTINGVKFEEYLKSQI
 ATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH`)
 
-	fasta := ParseFASTA(fileData)
+	faa := fasta.Parse(fileData)
 
-	t.Log(fasta.Sequences)
+	t.Log(faa.Sequences)
 
-	sequence1 := fasta.GetData("SEQUENCE_1")
+	sequence1 := faa.GetData("SEQUENCE_1")
 	if string(sequence1) != "MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGLVSVKVSDDFTIAAMRPSYLSYEDLDMTFVENEYKALVAELEKENEERRRLKDPNKPEHKIPQFASRKQLSDAILKEAEEKIKEELKAQGKPEKIWDNIIPGKMNSFIADNSQLDSKLTLMGQFYVMDDKKTVEQVIAEKEKEFGGKIKIVEFICFEVGEGLEKKTEDFAAEVAAQL" {
 		t.Errorf("sequence 1 not correct")
 		t.Log(string(sequence1))
 		t.Log("MTEITAAMVKELRESTGAGMMDCKNALSETNGDFDKAVQLLREKGLGKAAKKADRLAAEGLVSVKVSDDFTIAAMRPSYLSYEDLDMTFVENEYKALVAELEKENEERRRLKDPNKPEHKIPQFASRKQLSDAILKEAEEKIKEELKAQGKPEKIWDNIIPGKMNSFIADNSQLDSKLTLMGQFYVMDDKKTVEQVIAEKEKEFGGKIKIVEFICFEVGEGLEKKTEDFAAEVAAQL")
 	}
 
-	sequence2 := fasta.GetData("SEQUENCE_2")
+	sequence2 := faa.GetData("SEQUENCE_2")
 	if string(sequence2) != "SATVSEINSETDFVAKNDQFIALTKDTTAHIQSNSLQSVEELHSSTINGVKFEEYLKSQIATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH" {
 		t.Errorf("sequence 2 not correct")
 		t.Log(string(sequence2))
 		t.Log("SATVSEINSETDFVAKNDQFIALTKDTTAHIQSNSLQSVEELHSSTINGVKFEEYLKSQIATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH")
 	}
 
-	sequenceEmpty := fasta.GetData("SEQUENCE_EMPTY")
+	sequenceEmpty := faa.GetData("SEQUENCE_EMPTY")
 	if len(sequenceEmpty) != 0 {
 		t.Errorf("sequence empty not correct")
 		t.Log(string(sequenceEmpty))
@@ -49,7 +51,7 @@ ATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH`)
 		t.Log("sequence empty is nil")
 	}
 
-	sequenceNotFound := fasta.GetData("SEQUENCE_NOT_FOUND")
+	sequenceNotFound := faa.GetData("SEQUENCE_NOT_FOUND")
 	if len(sequenceNotFound) != 0 {
 		t.Errorf("sequence not found not correct")
 		t.Log(string(sequenceNotFound))
@@ -72,12 +74,12 @@ ATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH
 `
 	fileData := strings.NewReader(dataStr)
 
-	fasta := ParseFASTA(fileData)
+	faa := fasta.Parse(fileData)
 	buffer := bytes.NewBuffer(nil)
 
-	n, err := fasta.WriteTo(buffer)
+	n, err := faa.WriteTo(buffer)
 	if err != nil {
-		t.Fatalf("error writing fasta to buffer: %v", err)
+		t.Fatalf("error writing faa to buffer: %v", err)
 	}
 
 	if n != int64(buffer.Len()) {
@@ -97,7 +99,7 @@ ATIGENLVVRRFATLKAGANGVVNGYIHTNGRVGVVIAAACDSAEVASKSRDLLRQICMH
 func TestFASTA_Graph_simple(t *testing.T) {
 	t.Parallel()
 
-	fasta := ParseFASTA(strings.NewReader(`>Rosalind_0498
+	faa := fasta.Parse(strings.NewReader(`>Rosalind_0498
 AAATAAA
 >Rosalind_2391
 AAATTTT
@@ -108,8 +110,8 @@ AAATCCC
 >Rosalind_5013
 GGGTGGG`))
 
-	graph := fasta.Graph(3)
-	overlap := FASTAOverlapGraph(graph)
+	graph := fasta.Graph(faa, 3)
+	overlap := fasta.OverlapGraph(graph)
 	for _, value := range overlap {
 		t.Logf("%v", value)
 	}
@@ -118,7 +120,7 @@ GGGTGGG`))
 func TestFASTA_(t *testing.T) {
 	t.Parallel()
 
-	fasta := ParseFASTA(strings.NewReader(`>sp|B5ZC00|SYG_UREU1 Glycine--tRNA ligase OS=Ureaplasma urealyticum serovar 10 (strain ATCC 33699 / Western) OX=565575 GN=glyQS PE=3 SV=1
+	faa := fasta.Parse(strings.NewReader(`>sp|B5ZC00|SYG_UREU1 Glycine--tRNA ligase OS=Ureaplasma urealyticum serovar 10 (strain ATCC 33699 / Western) OX=565575 GN=glyQS PE=3 SV=1
 MKNKFKTQEELVNHLKTVGFVFANSEIYNGLANAWDYGPLGVLLKNNLKNLWWKEFVTKQ
 KDVVGLDSAIILNPLVWKASGHLDNFSDPLIDCKNCKARYRADKLIESFDENIHIAENSS
 NEEFAKVLNDYEISCPTCKQFNWTEIRHFNLMFKTYQGVIEDAKNVVYLRPETAQGIFVN
@@ -128,11 +130,11 @@ LSVHMNLSKKDLTYFDEQTKEKYVPHVIEPSVGVERLLYAILTEATFIEKLENDDERILM
 DLKYDLAPYKIAVMPLVNKLKDKAEEIYGKILDLNISATFDNSGSIGKRYRRQDAIGTIY
 CLTIDFDSLDDQQDPSFTIRERNSMAQKRIKLSELPLYLNQKAHEDFQRQCQK`))
 
-	t.Log(fasta.Sequences)
+	t.Log(faa.Sequences)
 
 	buffer := bytes.NewBuffer(nil)
-	_, _ = fasta.WriteTo(buffer)
+	_, _ = faa.WriteTo(buffer)
 	fmt.Println(buffer.String())
 
-	t.Log(fasta.Sequences)
+	t.Log(faa.Sequences)
 }

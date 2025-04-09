@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/cpl/rosalind/internal/fasta"
 )
 
 var defaultUniprotHttpClient = &http.Client{
@@ -22,19 +24,19 @@ type httpDoer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-func UniprotDownloadSequence(httpClient httpDoer, id string) (*FASTA, error) {
+func UniprotDownloadSequence(httpClient httpDoer, id string) (*fasta.FASTA, error) {
 	path := filepath.Join("./", "data", "uniprot", id+".fasta")
 	pathDir := filepath.Dir(path)
-	_ = os.MkdirAll(pathDir, 0755)
+	_ = os.MkdirAll(pathDir, 0o755)
 
-	fp, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0644)
+	fp, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o644)
 	if err != nil {
 		return nil, fmt.Errorf("error reading file %s: %v", id, err)
 	}
 	defer fp.Close()
 
 	if stat, _ := fp.Stat(); stat.Size() > 0 {
-		return ParseFASTA(fp), nil
+		return fasta.Parse(fp), nil
 	}
 
 	req, err := http.NewRequest("GET", "https://rest.uniprot.org/uniprotkb/"+id+".fasta", nil)
@@ -56,7 +58,7 @@ func UniprotDownloadSequence(httpClient httpDoer, id string) (*FASTA, error) {
 	defer r.Close()
 	data, _ := io.ReadAll(r)
 
-	fasta := ParseFASTA(bytes.NewReader(data))
+	fasta := fasta.Parse(bytes.NewReader(data))
 	_, err = fasta.WriteTo(fp)
 	if err != nil {
 		return nil, fmt.Errorf("error writing fasta to file: %w", err)

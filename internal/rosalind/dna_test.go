@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/cpl/rosalind/internal/fasta"
 )
 
 func TestNewDNA_invalidChar(t *testing.T) {
@@ -398,12 +400,12 @@ GCGGAACCACCAATGGCCGCGCACAGTGGATATGGGTGCAAGCGTCACGTGAGTGCGCGT
 ACGATAATGTATTGAAAGGTCTGCAGTCGGTACCTTTGA
 `)
 
-	fasta := ParseFASTA(data)
+	faa := fasta.Parse(data)
 
 	maxGC := -1.0
 	maxLabel := ""
 
-	for _, seq := range fasta.Sequences {
+	for _, seq := range faa.Sequences {
 		dna, _ := NewDNA(seq.Data)
 		gc := dna.GCContentPercent()
 
