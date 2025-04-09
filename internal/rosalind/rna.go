@@ -1,6 +1,9 @@
 package rosalind
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/cpl/rosalind/internal/unsafe"
+)
 
 type RNA struct {
 	data    []byte
@@ -12,7 +15,7 @@ type RNA struct {
 }
 
 func (rna *RNA) String() string {
-	return string(rna.data)
+	return unsafe.BytesToString(rna.data)
 }
 
 func (rna *RNA) ToProtein() (*Protein, error) {
